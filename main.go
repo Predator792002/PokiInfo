@@ -6,13 +6,26 @@ import (
 	"os"
 )
 
+// go
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
-	for true {
+	for {
 		fmt.Print("PokiInfo >")
-		scanner.Scan()
-		input := scanner.Text()
-		cleanedInput := cleanInput(input)
-		fmt.Printf("Your command was: %s\n", cleanedInput[0])
+		if !scanner.Scan() {
+			break
+		}
+		cleaned := cleanInput(scanner.Text())
+		if len(cleaned) == 0 {
+			continue
+		}
+		cmdName := cleaned[0]
+		cmd, ok := commands[cmdName]
+		if !ok {
+			fmt.Println("Unknown command")
+			continue
+		}
+		if err := cmd.callback(); err != nil {
+			fmt.Println(err)
+		}
 	}
 }
