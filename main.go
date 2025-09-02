@@ -1,31 +1,16 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
-	"os"
+	"time"
+
+	"github.com/Predator792002/PokiInfo/internal/pokeapi"
 )
 
-// go
 func main() {
-	scanner := bufio.NewScanner(os.Stdin)
-	for {
-		fmt.Print("PokiInfo >")
-		if !scanner.Scan() {
-			break
-		}
-		cleaned := cleanInput(scanner.Text())
-		if len(cleaned) == 0 {
-			continue
-		}
-		cmdName := cleaned[0]
-		cmd, ok := commands[cmdName]
-		if !ok {
-			fmt.Println("Unknown command")
-			continue
-		}
-		if err := cmd.callback(); err != nil {
-			fmt.Println(err)
-		}
+	pokeClient := pokeapi.NewClient(5 * time.Second)
+	cfg := &config{
+		pokeapiClient: pokeClient,
 	}
+
+	startRepl(cfg)
 }
