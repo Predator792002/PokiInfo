@@ -7,30 +7,42 @@ import (
 )
 
 // ListLocations -
-func (c *Client) ListLocations(pageURL *string) (RespShallowLocations, error) {
-	url := baseURL + "/location-area"
+func (c *Client) ListLocations(pageURL *string, cacheData []byte) (RespShallowLocations, error) {
+	url := BaseURL + "/location-area"
 	if pageURL != nil {
 		url = *pageURL
 	}
 
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return RespShallowLocations{}, err
+	var dat []byte
+
+	if cacheData == nil {
+		// Make HTTP request
+		req, err := http.NewRequest("GET", url, nil)
+		if err != nil {
+			return RespShallowLocations{}, err
+		}
+
+		resp, err := c.httpClient.Do(req)
+		if err != nil {
+			return RespShallowLocations{}, err
+		}
+		defer resp.Body.Close()
+
+		dat, err = io.ReadAll(resp.Body)
+		if err != nil {
+			return RespShallowLocations{}, err
+		}
+
+		// Add to cache after successful request
+		c.Cache.Add(url, dat)
+	} else {
+		// Use cached data
+		dat = cacheData
 	}
 
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return RespShallowLocations{}, err
-	}
-	defer resp.Body.Close()
-
-	dat, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return RespShallowLocations{}, err
-	}
-
+	// Unmarshal once (whether from cache or HTTP)
 	locationsResp := RespShallowLocations{}
-	err = json.Unmarshal(dat, &locationsResp)
+	err := json.Unmarshal(dat, &locationsResp)
 	if err != nil {
 		return RespShallowLocations{}, err
 	}

@@ -3,12 +3,30 @@ package main
 import (
 	"errors"
 	"fmt"
+
+	"github.com/Predator792002/PokiInfo/internal/pokeapi"
 )
 
 func commandMapf(cfg *config) error {
-	locationsResp, err := cfg.pokeapiClient.ListLocations(cfg.nextLocationsURL)
-	if err != nil {
-		return err
+	url := pokeapi.BaseURL + "/location-area" // Default URL for first page
+	if cfg.nextLocationsURL != nil {
+		url = *cfg.nextLocationsURL
+	}
+
+	data, ok := cfg.pokeapiClient.Cache.Get(url)
+
+	var locationsResp pokeapi.RespShallowLocations
+	var err error
+	if ok {
+		locationsResp, err = cfg.pokeapiClient.ListLocations(cfg.nextLocationsURL, data)
+		if err != nil {
+			return err
+		}
+	} else {
+		locationsResp, err = cfg.pokeapiClient.ListLocations(cfg.nextLocationsURL, nil)
+		if err != nil {
+			return err
+		}
 	}
 
 	cfg.nextLocationsURL = locationsResp.Next
@@ -25,15 +43,26 @@ func commandMapb(cfg *config) error {
 		return errors.New("you're on the first page")
 	}
 
-	locationResp, err := cfg.pokeapiClient.ListLocations(cfg.prevLocationsURL)
-	if err != nil {
-		return err
+	data, ok := cfg.pokeapiClient.Cache.Get(*cfg.prevLocationsURL)
+
+	var locationsResp pokeapi.RespShallowLocations
+	var err error
+	if ok {
+		locationsResp, err = cfg.pokeapiClient.ListLocations(cfg.prevLocationsURL, data)
+		if err != nil {
+			return err
+		}
+	} else {
+		locationsResp, err = cfg.pokeapiClient.ListLocations(cfg.prevLocationsURL, nil)
+		if err != nil {
+			return err
+		}
 	}
 
-	cfg.nextLocationsURL = locationResp.Next
-	cfg.prevLocationsURL = locationResp.Previous
+	cfg.nextLocationsURL = locationsResp.Next
+	cfg.prevLocationsURL = locationsResp.Previous
 
-	for _, loc := range locationResp.Results {
+	for _, loc := range locationsResp.Results {
 		fmt.Println(loc.Name)
 	}
 	return nil
