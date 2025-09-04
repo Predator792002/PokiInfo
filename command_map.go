@@ -7,7 +7,7 @@ import (
 	"github.com/Predator792002/PokiInfo/internal/pokeapi"
 )
 
-func commandMapf(cfg *config) error {
+func commandMapf(cfg *config, args []string) error {
 	url := pokeapi.BaseURL + "/location-area" // Default URL for first page
 	if cfg.nextLocationsURL != nil {
 		url = *cfg.nextLocationsURL
@@ -38,7 +38,7 @@ func commandMapf(cfg *config) error {
 	return nil
 }
 
-func commandMapb(cfg *config) error {
+func commandMapb(cfg *config, args []string) error {
 	if cfg.prevLocationsURL == nil {
 		return errors.New("you're on the first page")
 	}
