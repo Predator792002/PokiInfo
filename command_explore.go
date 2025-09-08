@@ -19,7 +19,7 @@ func commandExplore(cfg *config, args []string) error {
 		return err
 	}
 
-	fmt.Println("Found Pokemon:")
+	fmt.Println("Found Pokemons:")
 	for _, name := range pokemons {
 		fmt.Printf(" - %s\n", strings.ToLower(strings.TrimSpace(name)))
 	}
