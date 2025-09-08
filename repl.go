@@ -9,8 +9,13 @@ import (
 	"github.com/Predator792002/PokiInfo/internal/pokeapi"
 )
 
+type PokeIndex struct {
+	Name    string
+	BaseExp int
+}
 type config struct {
 	pokeapiClient    pokeapi.Client
+	pokeIndex        map[string]pokeapi.CaughtPokemon
 	nextLocationsURL *string
 	prevLocationsURL *string
 }
@@ -81,6 +86,21 @@ func getCommands() map[string]cliCommand {
 			name:        "explore",
 			description: "exploring in the area",
 			callback:    commandExplore,
+		},
+		"catch": {
+			name:        "catch",
+			description: "catching the pokemons",
+			callback:    CommandCatch,
+		},
+		"inspect": {
+			name:        "inspect",
+			description: "inspecting each pokemon",
+			callback:    CommandInspect,
+		},
+		"pokeindex": {
+			name:        "pokeindex",
+			description: "inspecting each pokemon",
+			callback:    CommandPokeIndex,
 		},
 	}
 }
